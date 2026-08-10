@@ -9,6 +9,7 @@ use App\Jobs\GenerateInvoicePdfJob;
 use App\Jobs\SendInvoiceEmailJob;
 use App\Models\Client;
 use App\Models\Invoice;
+use App\Models\UsageCounter;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Bus;
@@ -102,6 +103,11 @@ class InvoiceController extends Controller
 
             $invoice->update(['invoice_number' => 'INV-' . str_pad((string) $invoice->id, 5, '0', STR_PAD_LEFT)]);
             $invoice->items()->createMany($rows);
+
+            // Counters are keyed by calendar month, so a new month starts
+            // fresh automatically — no separate reset job needed.
+            $period = now()->startOfMonth()->toDateString();
+            UsageCounter::firstOrCreate(['period' => $period])->increment('invoices_created');
 
             return $invoice;
         });

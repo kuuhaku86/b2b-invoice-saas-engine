@@ -43,6 +43,8 @@ Route::middleware([
         Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
         Route::resource('clients', ClientController::class)->except(['show', 'edit', 'update']);
-        Route::resource('invoices', InvoiceController::class)->except(['edit', 'update', 'destroy']);
+        Route::resource('invoices', InvoiceController::class)
+            ->except(['edit', 'update', 'destroy'])
+            ->middlewareFor('store', 'plan.limit');
     });
 });
