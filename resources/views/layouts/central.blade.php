@@ -16,6 +16,7 @@
 </head>
 <body>
     <nav>
+        <a href="{{ route('central.dashboard') }}">Dashboard</a>
         <a href="{{ route('central.tenants.index') }}">Tenants</a>
         <a href="{{ route('central.plans.index') }}">Plans</a>
         <a href="{{ url('/horizon') }}">Horizon</a>

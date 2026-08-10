@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Central\AuthController;
+use App\Http\Controllers\Central\DashboardController;
 use App\Http\Controllers\Central\PlanController;
 use App\Http\Controllers\Central\StripeWebhookController;
 use App\Http\Controllers\Central\TenantController;
@@ -35,6 +36,7 @@ foreach (config('tenancy.central_domains') as $domain) {
             // signup (see Central\AuthController).
             Route::middleware('auth')->group(function () {
                 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+                Route::get('/admin/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
                 Route::prefix('admin')->group(function () {
                     Route::resource('tenants', TenantController::class)->except('show');

@@ -28,6 +28,8 @@ class Tenant extends BaseTenant implements TenantWithDatabase
             'plan_id',
             'stripe_customer_id',
             'stripe_subscription_id',
+            'subscription_status',
+            'subscription_cancelled_at',
         ]);
     }
 }

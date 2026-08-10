@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\CheckPlanLimit;
+use App\Http\Middleware\HandleInertiaRequests;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -24,6 +25,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // Authenticated by Stripe-Signature verification instead of CSRF —
         // Stripe can't obtain our CSRF token.
         $middleware->validateCsrfTokens(except: ['stripe/webhook']);
+        $middleware->web(append: [HandleInertiaRequests::class]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         // A subdomain with no matching tenant should 404, not leak a 500

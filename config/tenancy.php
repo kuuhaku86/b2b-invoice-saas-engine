@@ -139,8 +139,15 @@ return [
          * packages that use asset() calls inside the tenant app. To avoid such issues, you can
          * disable asset() helper tenancy and explicitly use tenant_asset() calls in places
          * where you want to use tenant-specific assets (product images, avatars, etc).
+         *
+         * Disabled: Vite's @vite directive (used by our Inertia pages) calls
+         * asset() internally to resolve built JS/CSS URLs. Those bundles are
+         * global static files, not per-tenant data, so tenant-scoping them
+         * 404s (there's no such file under the tenant's storage tree). We
+         * have no per-tenant public assets today; if that changes, use
+         * tenant_asset() explicitly for those instead of re-enabling this.
          */
-        'asset_helper_tenancy' => true,
+        'asset_helper_tenancy' => false,
     ],
 
     /**

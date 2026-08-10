@@ -58,9 +58,10 @@ class ProcessStripeWebhookJob implements ShouldQueue
             ? now()->setTimestamp($invoice['lines']['data'][0]['period']['end'])
             : null;
 
-        if ($subscriptionId) {
-            $tenant->update(['stripe_subscription_id' => $subscriptionId]);
-        }
+        $tenant->update(array_filter([
+            'stripe_subscription_id' => $subscriptionId,
+            'subscription_status' => 'active',
+        ]));
 
         tenancy()->initialize($tenant);
 
@@ -83,6 +84,8 @@ class ProcessStripeWebhookJob implements ShouldQueue
     {
         $subscriptionId = $invoice['subscription'] ?? $tenant->stripe_subscription_id;
 
+        $tenant->update(['subscription_status' => 'past_due']);
+
         tenancy()->initialize($tenant);
 
         try {
@@ -101,6 +104,8 @@ class ProcessStripeWebhookJob implements ShouldQueue
 
     private function handleSubscriptionDeleted(Tenant $tenant, array $subscription): void
     {
+        $tenant->update(['subscription_status' => 'cancelled', 'subscription_cancelled_at' => now()]);
+
         tenancy()->initialize($tenant);
 
         try {
