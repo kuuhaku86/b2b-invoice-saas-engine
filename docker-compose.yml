@@ -1,0 +1,58 @@
+services:
+    app:
+        build:
+            context: .
+            dockerfile: docker/Dockerfile
+        volumes:
+            - .:/var/www/html
+        depends_on:
+            - mysql
+            - redis
+        environment:
+            DB_HOST: mysql
+            REDIS_HOST: redis
+            MAIL_HOST: mailpit
+
+    nginx:
+        image: nginx:alpine
+        ports:
+            - "80:80"
+        volumes:
+            - .:/var/www/html
+            - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+        depends_on:
+            - app
+
+    mysql:
+        image: mysql:8.0
+        # The app connects as root (DB_USERNAME=root) because stancl/tenancy
+        # needs CREATE DATABASE / DROP DATABASE privileges to provision and
+        # tear down per-tenant databases dynamically. Fine for local dev;
+        # a production deploy should scope this down (e.g. PermissionControlledMySQLDatabaseManager).
+        environment:
+            MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-secret}
+            MYSQL_DATABASE: ${DB_DATABASE:-saas_central}
+        # Published on 3307, not 3306, to avoid clashing with a MySQL instance
+        # that may already be running on the host. Containers still reach
+        # this service on the internal port 3306 via the "mysql" hostname.
+        ports:
+            - "3307:3306"
+        volumes:
+            - mysql-data:/var/lib/mysql
+
+    redis:
+        image: redis:alpine
+        # Published on 6390 to avoid clashing with a host Redis instance (and
+        # other projects' containers); containers reach this service
+        # internally as "redis":6379.
+        ports:
+            - "6390:6379"
+
+    mailpit:
+        image: axllent/mailpit
+        ports:
+            - "1025:1025"
+            - "8025:8025"
+
+volumes:
+    mysql-data:
