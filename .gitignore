@@ -5,6 +5,10 @@
 /public/storage
 /storage/*.key
 /storage/pail
+# Per-tenant storage roots created at runtime by FilesystemTenancyBootstrapper
+# (suffix_base "tenant" + tenant id, e.g. storage/tenantacme) — not
+# Laravel's default storage/* layout, so not covered by the patterns above.
+/storage/tenant*
 /vendor
 .env
 .env.backup

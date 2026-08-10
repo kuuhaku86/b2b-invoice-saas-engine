@@ -3,7 +3,9 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Tenant\AuthController;
+use App\Http\Controllers\Tenant\ClientController;
 use App\Http\Controllers\Tenant\DashboardController;
+use App\Http\Controllers\Tenant\InvoiceController;
 use Illuminate\Support\Facades\Route;
 use Stancl\Tenancy\Middleware\InitializeTenancyBySubdomain;
 use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
@@ -39,5 +41,8 @@ Route::middleware([
     Route::middleware('auth')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
         Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+        Route::resource('clients', ClientController::class)->except(['show', 'edit', 'update']);
+        Route::resource('invoices', InvoiceController::class)->except(['edit', 'update', 'destroy']);
     });
 });

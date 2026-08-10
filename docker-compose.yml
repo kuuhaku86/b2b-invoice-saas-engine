@@ -13,6 +13,21 @@ services:
             REDIS_HOST: redis
             MAIL_HOST: mailpit
 
+    horizon:
+        build:
+            context: .
+            dockerfile: docker/Dockerfile
+        command: php artisan horizon
+        volumes:
+            - .:/var/www/html
+        depends_on:
+            - mysql
+            - redis
+        environment:
+            DB_HOST: mysql
+            REDIS_HOST: redis
+            MAIL_HOST: mailpit
+
     nginx:
         image: nginx:alpine
         ports:
