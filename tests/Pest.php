@@ -32,3 +32,12 @@ pest()->extend(Tests\TestCase::class)
         $this->seed(Database\Seeders\PlanSeeder::class);
     })
     ->in('Feature');
+
+// Browser tests drive a real Chrome instance against the actual running
+// dev stack (see tests/DuskTestCase.php) — no DatabaseMigrations/
+// RefreshDatabase here either, for the same reason as above, and because
+// wiping the schema between tests would nuke real local dev data these
+// tests run alongside. Each test provisions and tears down its own
+// uniquely-named tenants (see tests/Browser/TenantIsolationTest.php).
+pest()->extend(Tests\DuskTestCase::class)
+    ->in('Browser');

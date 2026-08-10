@@ -69,8 +69,9 @@ model → invoicing → billing → gating → recurring → Horizon → dashboa
    docker compose up -d --build
    ```
 
-   This brings up `app` (PHP-FPM), `nginx`, `mysql`, `redis`, `mailpit`, and
-   `horizon` (the queue worker). Nginx listens on port 80.
+   This brings up `app` (PHP-FPM), `nginx`, `mysql`, `redis`, `mailpit`,
+   `horizon` (the queue worker), and `selenium` (for browser tests — see
+   below). Nginx listens on port 80.
 
 4. **Install PHP dependencies and set up the central database**
 
@@ -182,6 +183,38 @@ MySQL. See the comment in `tests/Pest.php` for the full explanation.
 
 CI (`.github/workflows/tests.yml`) runs the same suite against MySQL/Redis
 service containers on every push and PR to `main`.
+
+### End-to-end (browser) tests
+
+```bash
+docker compose exec app php artisan dusk
+```
+
+These use [Laravel Dusk](https://laravel.com/docs/dusk) to drive a real
+headless Chrome — via the `selenium` service, since the `app` container is
+PHP-only and has no browser to run locally — against the actual dev stack
+your browser would hit at `http://saas.test`. They exist specifically to
+cover what `tests/Feature` structurally cannot: Laravel's HTTP test client
+shares in-process session state across simulated requests regardless of
+target host, so it can't verify real cookie scoping. `tests/Browser/
+TenantIsolationTest.php` logs in on one tenant subdomain with a real browser
+and confirms the session cookie isn't honored on another — the actual thing
+protecting tenants from each other in production.
+
+A few things follow from testing against the real stack rather than an
+isolated one (see `phpunit.dusk.xml` for why there's no env override here,
+unlike `phpunit.xml`):
+
+- Browser tests **do mutate your local dev database** (`saas_central` and
+  whatever tenant databases they create). They use fixed tenant ids
+  (`e2ea`, `e2eb`) reserved and cleaned up for this purpose — don't reuse
+  those ids for real dev tenants.
+- Those two hostnames need to resolve *inside* the Docker network (so
+  Selenium's Chrome can reach them) — see the `nginx` service's `aliases`
+  in `docker-compose.yml`. If you add more browser tests against new
+  subdomains, add an alias for each.
+- `tearDown()` in `tests/DuskTestCase.php` drops any tenant a test created,
+  same pattern as the Feature test suite.
 
 ## Notable design decisions
 

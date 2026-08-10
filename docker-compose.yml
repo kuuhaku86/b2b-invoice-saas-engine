@@ -37,6 +37,23 @@ services:
             - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
         depends_on:
             - app
+        # These aliases make the hostnames resolvable *inside* the compose
+        # network (e.g. by the `selenium` container's browser), the same way
+        # /etc/hosts entries make them resolvable from the host machine.
+        # e2ea/e2eb are fixed tenant subdomains reserved for Dusk browser
+        # tests (tests/Browser/*) — don't reuse them for real dev tenants.
+        networks:
+            default:
+                aliases:
+                    - saas.test
+                    - e2ea.saas.test
+                    - e2eb.saas.test
+
+    selenium:
+        image: selenium/standalone-chromium
+        shm_size: 2gb
+        ports:
+            - "4444:4444"
 
     mysql:
         image: mysql:8.0

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+         bootstrap="vendor/autoload.php"
+         colors="true"
+>
+    <testsuites>
+        <testsuite name="Browser">
+            <directory>tests/Browser</directory>
+        </testsuite>
+    </testsuites>
+    <!--
+        Deliberately no <php><env> overrides here (unlike phpunit.xml).
+        Browser tests drive a real Chrome instance against the app as
+        actually served by nginx/php-fpm — a *separate* process that reads
+        the real .env, not whatever env vars this test runner process has.
+        Overriding DB_DATABASE/SESSION_DRIVER/etc. here the way phpunit.xml
+        does for Feature tests would make this process and php-fpm disagree
+        about which database and session driver are in play (e.g. a tenant
+        created against a testing-only database that php-fpm, reading the
+        real .env, would never find). So: real .env, real saas_central,
+        real tenant databases — same as a human clicking through the app.
+    -->
+</phpunit>
