@@ -1,6 +1,6 @@
 @extends('layouts.tenant')
 
-@section('title', 'Clients')
+@section('title', 'Recurring Invoices')
 
 @section('content')
     @if (session('status'))
@@ -15,26 +15,30 @@
         <a href="{{ route('tenant.billing.index') }}">Billing</a>
     </nav>
 
-    <h1>Clients</h1>
-    <a href="{{ route('tenant.clients.create') }}">+ New client</a>
+    <h1>Recurring invoices</h1>
+    <a href="{{ route('tenant.recurring.create') }}">+ New schedule</a>
 
     <table>
         <thead>
             <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Phone</th>
+                <th>Client</th>
+                <th>Description</th>
+                <th>Interval</th>
+                <th>Next run</th>
+                <th>Active</th>
                 <th></th>
             </tr>
         </thead>
         <tbody>
-            @foreach ($clients as $client)
+            @foreach ($templates as $template)
                 <tr>
-                    <td>{{ $client->name }}</td>
-                    <td>{{ $client->email }}</td>
-                    <td>{{ $client->phone }}</td>
+                    <td>{{ $template->client->name }}</td>
+                    <td>{{ $template->items[0]['description'] ?? '' }}</td>
+                    <td>{{ ucfirst($template->interval) }}</td>
+                    <td>{{ $template->next_run_date->toFormattedDateString() }}</td>
+                    <td>{{ $template->active ? 'Yes' : 'No' }}</td>
                     <td>
-                        <form class="inline" method="POST" action="{{ route('tenant.clients.destroy', $client) }}" onsubmit="return confirm('Delete this client?');">
+                        <form class="inline" method="POST" action="{{ route('tenant.recurring.destroy', $template) }}" onsubmit="return confirm('Delete this schedule?');">
                             @csrf
                             @method('DELETE')
                             <button type="submit">Delete</button>

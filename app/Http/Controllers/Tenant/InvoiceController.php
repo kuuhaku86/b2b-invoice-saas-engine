@@ -9,11 +9,10 @@ use App\Jobs\GenerateInvoicePdfJob;
 use App\Jobs\SendInvoiceEmailJob;
 use App\Models\Client;
 use App\Models\Invoice;
-use App\Models\UsageCounter;
+use App\Services\InvoiceFactory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Bus;
-use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class InvoiceController extends Controller
@@ -39,7 +38,7 @@ class InvoiceController extends Controller
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, InvoiceFactory $invoices): RedirectResponse
     {
         $validated = $request->validate([
             'client_id' => ['required', 'exists:clients,id'],
@@ -62,55 +61,13 @@ class InvoiceController extends Controller
             return back()->withErrors(['items' => 'Add at least one line item.'])->withInput();
         }
 
-        $invoice = DB::transaction(function () use ($validated, $items) {
-            $subtotal = 0;
-            $taxTotal = 0;
-            $rows = [];
-
-            foreach ($items as $item) {
-                $quantity = (float) $item['quantity'];
-                $unitPrice = (float) $item['unit_price'];
-                $taxRate = (float) ($item['tax_rate'] ?? 0);
-
-                $lineSubtotal = round($quantity * $unitPrice, 2);
-                $lineTax = round($lineSubtotal * $taxRate / 100, 2);
-
-                $subtotal += $lineSubtotal;
-                $taxTotal += $lineTax;
-
-                $rows[] = [
-                    'description' => $item['description'],
-                    'quantity' => $quantity,
-                    'unit_price' => $unitPrice,
-                    'tax_rate' => $taxRate,
-                    'total' => $lineSubtotal + $lineTax,
-                ];
-            }
-
-            $discountTotal = (float) ($validated['discount_total'] ?? 0);
-
-            $invoice = Invoice::create([
-                'client_id' => $validated['client_id'],
-                'invoice_number' => 'PENDING',
-                'status' => 'draft',
-                'issue_date' => $validated['issue_date'],
-                'due_date' => $validated['due_date'],
-                'subtotal' => $subtotal,
-                'tax_total' => $taxTotal,
-                'discount_total' => $discountTotal,
-                'total' => $subtotal + $taxTotal - $discountTotal,
-            ]);
-
-            $invoice->update(['invoice_number' => 'INV-' . str_pad((string) $invoice->id, 5, '0', STR_PAD_LEFT)]);
-            $invoice->items()->createMany($rows);
-
-            // Counters are keyed by calendar month, so a new month starts
-            // fresh automatically — no separate reset job needed.
-            $period = now()->startOfMonth()->toDateString();
-            UsageCounter::firstOrCreate(['period' => $period])->increment('invoices_created');
-
-            return $invoice;
-        });
+        $invoice = $invoices->createFromItems(
+            Client::findOrFail($validated['client_id']),
+            $items,
+            (float) ($validated['discount_total'] ?? 0),
+            $validated['issue_date'],
+            $validated['due_date'],
+        );
 
         // GenerateInvoicePdfJob writes invoice->pdf_path before
         // SendInvoiceEmailJob runs — chained jobs run sequentially, and

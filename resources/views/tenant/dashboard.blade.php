@@ -7,6 +7,8 @@
         <a href="{{ route('tenant.dashboard') }}">Dashboard</a>
         <a href="{{ route('tenant.clients.index') }}">Clients</a>
         <a href="{{ route('tenant.invoices.index') }}">Invoices</a>
+        <a href="{{ route('tenant.recurring.index') }}">Recurring</a>
+        <a href="{{ route('tenant.billing.index') }}">Billing</a>
     </nav>
 
     <h1>Dashboard</h1>

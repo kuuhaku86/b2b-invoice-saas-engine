@@ -7,6 +7,7 @@ use App\Http\Controllers\Tenant\BillingController;
 use App\Http\Controllers\Tenant\ClientController;
 use App\Http\Controllers\Tenant\DashboardController;
 use App\Http\Controllers\Tenant\InvoiceController;
+use App\Http\Controllers\Tenant\RecurringInvoiceController;
 use Illuminate\Support\Facades\Route;
 use Stancl\Tenancy\Middleware\InitializeTenancyBySubdomain;
 use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
@@ -50,5 +51,7 @@ Route::middleware([
 
         Route::get('/billing', [BillingController::class, 'index'])->name('billing.index');
         Route::post('/billing/checkout/{plan}', [BillingController::class, 'checkout'])->name('billing.checkout');
+
+        Route::resource('recurring', RecurringInvoiceController::class)->except(['show', 'edit', 'update']);
     });
 });
