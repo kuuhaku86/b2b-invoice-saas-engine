@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Central\PlanController;
+use App\Http\Controllers\Central\TenantController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -19,6 +21,14 @@ foreach (config('tenancy.central_domains') as $domain) {
     Route::domain($domain)->group(function () {
         Route::get('/', function () {
             return view('welcome');
+        });
+
+        // Landlord/admin: no auth gate yet — that lands alongside tenant
+        // auth in a later milestone. Do not expose this domain publicly
+        // until it's locked down.
+        Route::prefix('admin')->name('central.')->group(function () {
+            Route::resource('tenants', TenantController::class)->except('show');
+            Route::resource('plans', PlanController::class)->except('show');
         });
     });
 }
