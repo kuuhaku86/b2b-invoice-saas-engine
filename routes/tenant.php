@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Tenant\AuthController;
+use App\Http\Controllers\Tenant\DashboardController;
 use Illuminate\Support\Facades\Route;
 use Stancl\Tenancy\Middleware\InitializeTenancyBySubdomain;
 use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
@@ -22,8 +24,20 @@ Route::middleware([
     'web',
     InitializeTenancyBySubdomain::class,
     PreventAccessFromCentralDomains::class,
-])->group(function () {
+])->name('tenant.')->group(function () {
     Route::get('/', function () {
         return 'This is your multi-tenant application. The id of the current tenant is ' . tenant('id');
+    });
+
+    Route::middleware('guest')->group(function () {
+        Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
+        Route::post('/register', [AuthController::class, 'register']);
+        Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+        Route::post('/login', [AuthController::class, 'login'])->name('login.attempt');
+    });
+
+    Route::middleware('auth')->group(function () {
+        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+        Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     });
 });

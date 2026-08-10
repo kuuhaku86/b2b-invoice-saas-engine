@@ -13,7 +13,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        //
+        // Only the tenant side has 'auth'-protected routes today; the
+        // central admin has none yet (see routes/central.php).
+        $middleware->redirectGuestsTo(fn () => route('tenant.login'));
     })
     ->withExceptions(function (Exceptions $exceptions) {
         // A subdomain with no matching tenant should 404, not leak a 500
