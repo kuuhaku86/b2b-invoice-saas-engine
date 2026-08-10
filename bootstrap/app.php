@@ -14,9 +14,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        // Only the tenant side has 'auth'-protected routes today; the
-        // central admin has none yet (see routes/central.php).
-        $middleware->redirectGuestsTo(fn () => route('tenant.login'));
+        // Both sides have 'auth'-protected routes now (tenant dashboard vs.
+        // central admin + Horizon) — send guests to whichever login belongs
+        // to the context they were in.
+        $middleware->redirectGuestsTo(
+            fn () => tenancy()->initialized ? route('tenant.login') : route('central.login')
+        );
         $middleware->alias(['plan.limit' => CheckPlanLimit::class]);
         // Authenticated by Stripe-Signature verification instead of CSRF —
         // Stripe can't obtain our CSRF token.

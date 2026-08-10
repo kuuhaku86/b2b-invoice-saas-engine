@@ -18,6 +18,13 @@
     <nav>
         <a href="{{ route('central.tenants.index') }}">Tenants</a>
         <a href="{{ route('central.plans.index') }}">Plans</a>
+        <a href="{{ url('/horizon') }}">Horizon</a>
+        @auth
+            <form class="inline" method="POST" action="{{ route('central.logout') }}">
+                @csrf
+                <button type="submit">Log out</button>
+            </form>
+        @endauth
     </nav>
     <hr>
 

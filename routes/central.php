@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Central\AuthController;
 use App\Http\Controllers\Central\PlanController;
 use App\Http\Controllers\Central\StripeWebhookController;
 use App\Http\Controllers\Central\TenantController;
@@ -24,12 +25,22 @@ foreach (config('tenancy.central_domains') as $domain) {
             return view('welcome');
         });
 
-        // Landlord/admin: no auth gate yet — that lands alongside tenant
-        // auth in a later milestone. Do not expose this domain publicly
-        // until it's locked down.
-        Route::prefix('admin')->name('central.')->group(function () {
-            Route::resource('tenants', TenantController::class)->except('show');
-            Route::resource('plans', PlanController::class)->except('show');
+        Route::name('central.')->group(function () {
+            Route::middleware('guest')->group(function () {
+                Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+                Route::post('/login', [AuthController::class, 'login'])->name('login.attempt');
+            });
+
+            // Landlord/admin — provisioned via seeder/tinker, no self-service
+            // signup (see Central\AuthController).
+            Route::middleware('auth')->group(function () {
+                Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+                Route::prefix('admin')->group(function () {
+                    Route::resource('tenants', TenantController::class)->except('show');
+                    Route::resource('plans', PlanController::class)->except('show');
+                });
+            });
         });
 
         // Stripe posts here regardless of tenant (see StripeWebhookController).

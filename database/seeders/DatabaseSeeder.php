@@ -13,11 +13,13 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
+        // This seeder runs against the central connection (no tenant
+        // active), so this row lands in the central `users` table — it's
+        // the landlord/admin login for /admin and /horizon, not a tenant
+        // user. Change the password before deploying anywhere real.
         User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+            'name' => 'Admin',
+            'email' => 'admin@saas.test',
         ]);
 
         $this->call(PlanSeeder::class);

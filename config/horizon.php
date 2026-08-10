@@ -28,7 +28,9 @@ return [
     |
     */
 
-    'domain' => env('HORIZON_DOMAIN'),
+    // Central-only: Horizon exposes queue internals, so it belongs on the
+    // landlord domain, not reachable via any tenant subdomain.
+    'domain' => env('HORIZON_DOMAIN', env('CENTRAL_DOMAIN', 'saas.test')),
 
     /*
     |--------------------------------------------------------------------------
@@ -83,7 +85,10 @@ return [
     |
     */
 
-    'middleware' => ['web'],
+    // 'auth' here relies on the same guard tenant routes use, but since
+    // this domain is central-only (see 'domain' above), it authenticates
+    // against the central `users` table — i.e. landlord admins.
+    'middleware' => ['web', 'auth'],
 
     /*
     |--------------------------------------------------------------------------

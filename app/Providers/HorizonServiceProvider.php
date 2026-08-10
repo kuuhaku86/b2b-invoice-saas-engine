@@ -24,13 +24,14 @@ class HorizonServiceProvider extends HorizonApplicationServiceProvider
      * Register the Horizon gate.
      *
      * This gate determines who can access Horizon in non-local environments.
+     * The 'auth' middleware in config/horizon.php already guarantees $user
+     * is an authenticated central user (Horizon's routes are central-domain
+     * only) — no separate email allowlist needed.
      */
     protected function gate(): void
     {
         Gate::define('viewHorizon', function ($user = null) {
-            return in_array(optional($user)->email, [
-                //
-            ]);
+            return $user !== null;
         });
     }
 }
