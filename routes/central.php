@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Central\PlanController;
+use App\Http\Controllers\Central\StripeWebhookController;
 use App\Http\Controllers\Central\TenantController;
 use Illuminate\Support\Facades\Route;
 
@@ -30,5 +31,10 @@ foreach (config('tenancy.central_domains') as $domain) {
             Route::resource('tenants', TenantController::class)->except('show');
             Route::resource('plans', PlanController::class)->except('show');
         });
+
+        // Stripe posts here regardless of tenant (see StripeWebhookController).
+        // CSRF-excluded in bootstrap/app.php — this is authenticated by
+        // signature verification instead.
+        Route::post('/stripe/webhook', StripeWebhookController::class)->name('stripe.webhook');
     });
 }

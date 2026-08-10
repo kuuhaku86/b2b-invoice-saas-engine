@@ -18,6 +18,9 @@ return Application::configure(basePath: dirname(__DIR__))
         // central admin has none yet (see routes/central.php).
         $middleware->redirectGuestsTo(fn () => route('tenant.login'));
         $middleware->alias(['plan.limit' => CheckPlanLimit::class]);
+        // Authenticated by Stripe-Signature verification instead of CSRF —
+        // Stripe can't obtain our CSRF token.
+        $middleware->validateCsrfTokens(except: ['stripe/webhook']);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         // A subdomain with no matching tenant should 404, not leak a 500

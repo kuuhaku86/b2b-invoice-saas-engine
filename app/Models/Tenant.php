@@ -26,6 +26,8 @@ class Tenant extends BaseTenant implements TenantWithDatabase
     {
         return array_merge(parent::getCustomColumns(), [
             'plan_id',
+            'stripe_customer_id',
+            'stripe_subscription_id',
         ]);
     }
 }

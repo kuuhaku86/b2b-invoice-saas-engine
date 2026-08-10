@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Tenant\AuthController;
+use App\Http\Controllers\Tenant\BillingController;
 use App\Http\Controllers\Tenant\ClientController;
 use App\Http\Controllers\Tenant\DashboardController;
 use App\Http\Controllers\Tenant\InvoiceController;
@@ -46,5 +47,8 @@ Route::middleware([
         Route::resource('invoices', InvoiceController::class)
             ->except(['edit', 'update', 'destroy'])
             ->middlewareFor('store', 'plan.limit');
+
+        Route::get('/billing', [BillingController::class, 'index'])->name('billing.index');
+        Route::post('/billing/checkout/{plan}', [BillingController::class, 'checkout'])->name('billing.checkout');
     });
 });

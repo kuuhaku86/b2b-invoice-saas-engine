@@ -19,6 +19,7 @@ class Plan extends Model
         'name',
         'slug',
         'price',
+        'stripe_price_id',
         'invoice_quota',
         'features',
     ];
