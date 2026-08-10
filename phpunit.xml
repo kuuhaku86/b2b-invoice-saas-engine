@@ -22,8 +22,16 @@
         <env name="APP_MAINTENANCE_DRIVER" value="file"/>
         <env name="BCRYPT_ROUNDS" value="4"/>
         <env name="CACHE_STORE" value="array"/>
-        <!-- <env name="DB_CONNECTION" value="sqlite"/> -->
-        <!-- <env name="DB_DATABASE" value=":memory:"/> -->
+        <!--
+            Real MySQL, not sqlite: these tests provision and drop genuine
+            per-tenant databases (that's what's being tested), which
+            stancl/tenancy's MySQLDatabaseManager can't do against sqlite.
+            A dedicated *_testing central database keeps this from touching
+            local dev data.
+        -->
+        <env name="DB_CONNECTION" value="central"/>
+        <env name="DB_DATABASE" value="saas_central_testing"/>
+        <env name="CENTRAL_DOMAIN" value="saas.test"/>
         <env name="MAIL_MAILER" value="array"/>
         <env name="PULSE_ENABLED" value="false"/>
         <env name="QUEUE_CONNECTION" value="sync"/>
