@@ -116,6 +116,29 @@ model → invoicing → billing → gating → recurring → Horizon → dashboa
    Then register a user at `http://acme.saas.test/register` to get into the
    tenant app itself (clients, invoices, recurring schedules, billing).
 
+## Makefile shortcuts
+
+Steps 3–5 above (and most other day-to-day commands) are wrapped in a
+`Makefile`. Run `make help` for the full, self-documenting list; the most
+common ones:
+
+```bash
+make setup            # build, install deps, migrate+seed, build assets (steps 3-5)
+make up               # docker compose up -d --build
+make down             # docker compose down
+make shell            # shell into the app container
+make migrate-seed     # php artisan migrate --seed
+make migrate-fresh-seed  # php artisan migrate:fresh --seed
+make tinker           # php artisan tinker
+make test             # vendor/bin/pest
+make test-filter FILTER=Tenancy  # vendor/bin/pest --filter=Tenancy
+make dusk             # php artisan dusk (browser tests)
+make pint             # code style fixer
+make npm-dev          # vite dev server (HMR)
+make artisan ARGS="route:list"   # arbitrary artisan command
+make composer ARGS="require foo/bar"  # arbitrary composer command
+```
+
 ## Stripe webhooks (local dev)
 
 The webhook endpoint is `POST http://saas.test/stripe/webhook` — a single
@@ -158,6 +181,8 @@ on demand:
 docker compose exec app php artisan invoices:process-recurring
 ```
 
+or `make recurring`.
+
 In production, point a real system cron at `schedule:run` every minute, as
 usual for Laravel:
 
@@ -171,7 +196,7 @@ usual for Laravel:
 docker compose exec app vendor/bin/pest
 ```
 
-Tests run against a separate `saas_central_testing` database (see
+or `make test` (`make test-filter FILTER=Tenancy` to filter by name). Tests run against a separate `saas_central_testing` database (see
 `phpunit.xml`), migrated fresh automatically on first use — your dev data in
 `saas_central`/`tenantacme` is never touched. Tests that provision tenants
 clean up the physical databases they create in `tearDown()`.
@@ -190,7 +215,7 @@ service containers on every push and PR to `main`.
 docker compose exec app php artisan dusk
 ```
 
-These use [Laravel Dusk](https://laravel.com/docs/dusk) to drive a real
+or `make dusk`. These use [Laravel Dusk](https://laravel.com/docs/dusk) to drive a real
 headless Chrome — via the `selenium` service, since the `app` container is
 PHP-only and has no browser to run locally — against the actual dev stack
 your browser would hit at `http://saas.test`. They exist specifically to
