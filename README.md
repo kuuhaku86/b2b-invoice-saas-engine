@@ -30,10 +30,9 @@ processing (Horizon), and per-plan feature gating.
   Horizon), tenant-aware via `QueueTenancyBootstrapper` — a job dispatched under
   tenant A always re-initializes tenant A's database when a worker picks it up,
   regardless of which tenant the worker last processed.
-- **Frontend:** mostly server-rendered Blade (deliberately unstyled — this is a
-  backend-architecture showcase, not a design one). The two analytics dashboards
-  (`/dashboard` for tenants, `/admin/dashboard` for the landlord) are Inertia +
-  React.
+- **Frontend:** mostly server-rendered Blade, styled with the same Tailwind
+  build used by the two analytics dashboards (`/dashboard` for tenants,
+  `/admin/dashboard` for the landlord), which are Inertia + React.
 
 See the git log for how this was built milestone-by-milestone (tenancy → data
 model → invoicing → billing → gating → recurring → Horizon → dashboards → tests).

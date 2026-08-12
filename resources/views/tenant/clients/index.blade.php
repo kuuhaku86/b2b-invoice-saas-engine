@@ -3,45 +3,37 @@
 @section('title', 'Clients')
 
 @section('content')
-    @if (session('status'))
-        <div class="flash">{{ session('status') }}</div>
-    @endif
+    <div class="mb-6 flex items-center justify-between">
+        <h1 class="text-2xl font-bold">Clients</h1>
+        <a href="{{ route('tenant.clients.create') }}" class="rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700">+ New client</a>
+    </div>
 
-    <nav>
-        <a href="{{ route('tenant.dashboard') }}">Dashboard</a>
-        <a href="{{ route('tenant.clients.index') }}">Clients</a>
-        <a href="{{ route('tenant.invoices.index') }}">Invoices</a>
-        <a href="{{ route('tenant.recurring.index') }}">Recurring</a>
-        <a href="{{ route('tenant.billing.index') }}">Billing</a>
-    </nav>
-
-    <h1>Clients</h1>
-    <a href="{{ route('tenant.clients.create') }}">+ New client</a>
-
-    <table>
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Phone</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach ($clients as $client)
+    <div class="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
+        <table class="w-full text-sm">
+            <thead class="bg-gray-50 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
                 <tr>
-                    <td>{{ $client->name }}</td>
-                    <td>{{ $client->email }}</td>
-                    <td>{{ $client->phone }}</td>
-                    <td>
-                        <form class="inline" method="POST" action="{{ route('tenant.clients.destroy', $client) }}" onsubmit="return confirm('Delete this client?');">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit">Delete</button>
-                        </form>
-                    </td>
+                    <th class="px-4 py-3">Name</th>
+                    <th class="px-4 py-3">Email</th>
+                    <th class="px-4 py-3">Phone</th>
+                    <th class="px-4 py-3"></th>
                 </tr>
-            @endforeach
-        </tbody>
-    </table>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+                @foreach ($clients as $client)
+                    <tr>
+                        <td class="px-4 py-3 font-medium">{{ $client->name }}</td>
+                        <td class="px-4 py-3">{{ $client->email }}</td>
+                        <td class="px-4 py-3">{{ $client->phone }}</td>
+                        <td class="px-4 py-3">
+                            <form method="POST" action="{{ route('tenant.clients.destroy', $client) }}" onsubmit="return confirm('Delete this client?');">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="text-red-600 hover:underline">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
 @endsection

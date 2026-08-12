@@ -3,49 +3,45 @@
 @section('title', 'Recurring Invoices')
 
 @section('content')
-    @if (session('status'))
-        <div class="flash">{{ session('status') }}</div>
-    @endif
+    <div class="mb-6 flex items-center justify-between">
+        <h1 class="text-2xl font-bold">Recurring invoices</h1>
+        <a href="{{ route('tenant.recurring.create') }}" class="rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700">+ New schedule</a>
+    </div>
 
-    <nav>
-        <a href="{{ route('tenant.dashboard') }}">Dashboard</a>
-        <a href="{{ route('tenant.clients.index') }}">Clients</a>
-        <a href="{{ route('tenant.invoices.index') }}">Invoices</a>
-        <a href="{{ route('tenant.recurring.index') }}">Recurring</a>
-        <a href="{{ route('tenant.billing.index') }}">Billing</a>
-    </nav>
-
-    <h1>Recurring invoices</h1>
-    <a href="{{ route('tenant.recurring.create') }}">+ New schedule</a>
-
-    <table>
-        <thead>
-            <tr>
-                <th>Client</th>
-                <th>Description</th>
-                <th>Interval</th>
-                <th>Next run</th>
-                <th>Active</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach ($templates as $template)
+    <div class="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
+        <table class="w-full text-sm">
+            <thead class="bg-gray-50 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
                 <tr>
-                    <td>{{ $template->client->name }}</td>
-                    <td>{{ $template->items[0]['description'] ?? '' }}</td>
-                    <td>{{ ucfirst($template->interval) }}</td>
-                    <td>{{ $template->next_run_date->toFormattedDateString() }}</td>
-                    <td>{{ $template->active ? 'Yes' : 'No' }}</td>
-                    <td>
-                        <form class="inline" method="POST" action="{{ route('tenant.recurring.destroy', $template) }}" onsubmit="return confirm('Delete this schedule?');">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit">Delete</button>
-                        </form>
-                    </td>
+                    <th class="px-4 py-3">Client</th>
+                    <th class="px-4 py-3">Description</th>
+                    <th class="px-4 py-3">Interval</th>
+                    <th class="px-4 py-3">Next run</th>
+                    <th class="px-4 py-3">Active</th>
+                    <th class="px-4 py-3"></th>
                 </tr>
-            @endforeach
-        </tbody>
-    </table>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+                @foreach ($templates as $template)
+                    <tr>
+                        <td class="px-4 py-3 font-medium">{{ $template->client->name }}</td>
+                        <td class="px-4 py-3">{{ $template->items[0]['description'] ?? '' }}</td>
+                        <td class="px-4 py-3">{{ ucfirst($template->interval) }}</td>
+                        <td class="px-4 py-3">{{ $template->next_run_date->toFormattedDateString() }}</td>
+                        <td class="px-4 py-3">
+                            <span class="inline-flex rounded-full px-2 py-0.5 text-xs font-medium {{ $template->active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700' }}">
+                                {{ $template->active ? 'Yes' : 'No' }}
+                            </span>
+                        </td>
+                        <td class="px-4 py-3">
+                            <form method="POST" action="{{ route('tenant.recurring.destroy', $template) }}" onsubmit="return confirm('Delete this schedule?');">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="text-red-600 hover:underline">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
 @endsection
