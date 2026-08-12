@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -17,10 +18,10 @@ class DatabaseSeeder extends Seeder
         // active), so this row lands in the central `users` table — it's
         // the landlord/admin login for /admin and /horizon, not a tenant
         // user. Change the password before deploying anywhere real.
-        User::factory()->create([
-            'name' => 'Admin',
-            'email' => 'admin@saas.test',
-        ]);
+        User::updateOrCreate(
+            ['email' => 'admin@saas.test'],
+            ['name' => 'Admin', 'password' => Hash::make('password')]
+        );
 
         $this->call(PlanSeeder::class);
     }
