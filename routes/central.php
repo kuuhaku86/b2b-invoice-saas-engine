@@ -23,7 +23,9 @@ use Illuminate\Support\Facades\Route;
 foreach (config('tenancy.central_domains') as $domain) {
     Route::domain($domain)->group(function () {
         Route::get('/', function () {
-            return view('welcome');
+            return auth()->check()
+                ? redirect()->route('central.dashboard')
+                : redirect()->route('central.login');
         });
 
         Route::name('central.')->group(function () {

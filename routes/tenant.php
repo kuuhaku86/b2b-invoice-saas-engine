@@ -30,7 +30,9 @@ Route::middleware([
     PreventAccessFromCentralDomains::class,
 ])->name('tenant.')->group(function () {
     Route::get('/', function () {
-        return 'This is your multi-tenant application. The id of the current tenant is ' . tenant('id');
+        return auth()->check()
+            ? redirect()->route('tenant.dashboard')
+            : redirect()->route('tenant.login');
     });
 
     Route::middleware('guest')->group(function () {
