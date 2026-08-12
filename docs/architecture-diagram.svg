@@ -1,0 +1,155 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 900" role="img"
+     aria-label="Architecture diagram: browsers and Stripe webhooks hit nginx, which routes by Host header to either the Central (landlord) app on the apex domain or the Tenant app on a subdomain. The Central app writes to the central MySQL database and dispatches Stripe webhook processing to a Redis/Horizon queue; the Tenant app writes to its own per-tenant MySQL database, reads the central database to gate invoice creation on plan quota and subscription status, and dispatches PDF and email jobs to the same queue. A cron-triggered recurring-invoice command also feeds the Tenant app. Queue workers fan out to three jobs: generate an invoice PDF to storage, send an invoice email via Mailpit, and process the Stripe webhook, which updates subscription status back in the central database.">
+  <defs>
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#3b82f6"/>
+    </marker>
+    <marker id="arrow-orange" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#f97316"/>
+    </marker>
+    <marker id="arrow-green" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#22c55e"/>
+    </marker>
+    <marker id="arrow-slate" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#94a3b8"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="1000" height="900" fill="#0f172a"/>
+
+  <!-- title -->
+  <text x="500" y="24" text-anchor="middle" font-family="system-ui, sans-serif" font-size="15" font-weight="700" fill="#f1f5f9">B2B Invoice &amp; Subscription SaaS Engine — Request &amp; Job Flow</text>
+
+  <!-- ===== row A: external actors ===== -->
+  <rect x="40" y="54" width="230" height="50" rx="8" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+  <text x="155" y="84" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" font-weight="600" fill="#f1f5f9">Stripe</text>
+
+  <rect x="390" y="54" width="220" height="50" rx="8" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+  <text x="500" y="84" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" font-weight="600" fill="#f1f5f9">Browser</text>
+
+  <rect x="730" y="54" width="230" height="50" rx="8" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+  <text x="845" y="84" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" font-weight="600" fill="#f1f5f9">Scheduler (cron)</text>
+
+  <!-- ===== row B: nginx ===== -->
+  <rect x="390" y="140" width="220" height="50" rx="8" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+  <text x="500" y="168" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" font-weight="600" fill="#f1f5f9">nginx</text>
+  <text x="500" y="184" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#94a3b8">routes by Host header</text>
+
+  <!-- ===== row C: apps ===== -->
+  <rect x="40" y="226" width="420" height="90" rx="8" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+  <text x="250" y="260" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" font-weight="600" fill="#f1f5f9">Central App (landlord) — saas.test</text>
+  <text x="250" y="279" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" fill="#94a3b8">admin auth · tenants · plans</text>
+  <text x="250" y="295" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" fill="#94a3b8">Stripe webhook endpoint · admin dashboard (Inertia)</text>
+
+  <rect x="540" y="226" width="420" height="90" rx="8" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+  <text x="750" y="260" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" font-weight="600" fill="#f1f5f9">Tenant App — *.saas.test</text>
+  <text x="750" y="279" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" fill="#94a3b8">auth · clients · invoices (CheckPlanLimit)</text>
+  <text x="750" y="295" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" fill="#94a3b8">recurring · billing · tenant dashboard (Inertia)</text>
+
+  <!-- ===== row D: databases ===== -->
+  <rect x="40" y="352" width="420" height="70" rx="8" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+  <text x="250" y="380" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" font-weight="600" fill="#f1f5f9">MySQL — saas_central</text>
+  <text x="250" y="399" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" fill="#94a3b8">tenants · plans · admin users · webhook_events</text>
+
+  <rect x="540" y="352" width="420" height="70" rx="8" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+  <text x="750" y="380" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" font-weight="600" fill="#f1f5f9">MySQL — one DB per tenant</text>
+  <text x="750" y="399" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" fill="#94a3b8">tenantacme, … — clients · invoices · recurring templates</text>
+
+  <!-- ===== row E: queue ===== -->
+  <rect x="290" y="460" width="420" height="70" rx="8" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+  <text x="500" y="488" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" font-weight="600" fill="#f1f5f9">Redis + Horizon workers</text>
+  <text x="500" y="507" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" fill="#94a3b8">QueueTenancyBootstrapper re-initializes the job's tenant DB</text>
+
+  <!-- ===== row F: jobs ===== -->
+  <rect x="30" y="568" width="290" height="70" rx="8" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+  <text x="175" y="596" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" font-weight="600" fill="#f1f5f9">GenerateInvoicePdfJob</text>
+  <text x="175" y="615" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" fill="#94a3b8">renders via dompdf</text>
+
+  <rect x="355" y="568" width="290" height="70" rx="8" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+  <text x="500" y="596" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" font-weight="600" fill="#f1f5f9">SendInvoiceEmailJob</text>
+  <text x="500" y="615" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" fill="#94a3b8">mail via SMTP</text>
+
+  <rect x="680" y="568" width="290" height="70" rx="8" fill="#1e293b" stroke="#f97316" stroke-width="1.5"/>
+  <text x="825" y="596" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" font-weight="600" fill="#f1f5f9">ProcessStripeWebhookJob</text>
+  <text x="825" y="615" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" fill="#94a3b8">idempotent · syncs subscription_status</text>
+
+  <!-- ===== row G: sinks ===== -->
+  <rect x="30" y="676" width="290" height="56" rx="8" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+  <text x="175" y="709" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" fill="#f1f5f9">storage/app/invoices/*.pdf</text>
+
+  <rect x="355" y="676" width="290" height="56" rx="8" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+  <text x="500" y="709" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" fill="#f1f5f9">Mailpit (dev SMTP)</text>
+
+  <!-- ===== arrows ===== -->
+  <!-- Browser -> nginx -->
+  <line x1="500" y1="104" x2="500" y2="140" stroke="#3b82f6" stroke-width="2" marker-end="url(#arrow-blue)"/>
+
+  <!-- Stripe -> nginx -->
+  <line x1="270" y1="104" x2="398" y2="144" stroke="#f97316" stroke-width="2" marker-end="url(#arrow-orange)"/>
+  <text x="270" y="122" font-family="system-ui, sans-serif" font-size="10" fill="#fdba74">POST /stripe/webhook (signed)</text>
+
+  <!-- Scheduler -> Tenant App (bypasses nginx) -->
+  <line x1="880" y1="104" x2="900" y2="226" stroke="#3b82f6" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arrow-blue)"/>
+  <text x="895" y="170" text-anchor="end" font-family="system-ui, sans-serif" font-size="10" fill="#93c5fd">invoices:process-recurring</text>
+  <text x="895" y="183" text-anchor="end" font-family="system-ui, sans-serif" font-size="10" fill="#93c5fd">(schedule:run, all tenants)</text>
+
+  <!-- nginx -> Central App -->
+  <line x1="440" y1="190" x2="290" y2="226" stroke="#3b82f6" stroke-width="2" marker-end="url(#arrow-blue)"/>
+  <text x="330" y="212" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#93c5fd">Host: saas.test</text>
+
+  <!-- nginx -> Tenant App -->
+  <line x1="560" y1="190" x2="710" y2="226" stroke="#3b82f6" stroke-width="2" marker-end="url(#arrow-blue)"/>
+  <text x="670" y="212" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#93c5fd">Host: *.saas.test</text>
+
+  <!-- Central App -> Central DB -->
+  <line x1="250" y1="316" x2="250" y2="352" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow-slate)"/>
+
+  <!-- Tenant App -> Tenant DB -->
+  <line x1="750" y1="316" x2="750" y2="352" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow-slate)"/>
+
+  <!-- Tenant App -> Central DB (gating read) -->
+  <path d="M540,300 C480,300 460,320 460,352" fill="none" stroke="#94a3b8" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arrow-slate)"/>
+  <text x="533" y="330" text-anchor="end" font-family="system-ui, sans-serif" font-size="10" fill="#cbd5e1">CheckPlanLimit reads</text>
+  <text x="533" y="343" text-anchor="end" font-family="system-ui, sans-serif" font-size="10" fill="#cbd5e1">quota + subscription_status</text>
+
+  <!-- Central App -> Queue -->
+  <line x1="460" y1="280" x2="480" y2="460" stroke="#f97316" stroke-width="2" marker-end="url(#arrow-orange)"/>
+  <text x="472" y="436" text-anchor="end" font-family="system-ui, sans-serif" font-size="10" fill="#fdba74">dispatch:</text>
+  <text x="472" y="449" text-anchor="end" font-family="system-ui, sans-serif" font-size="10" fill="#fdba74">ProcessStripeWebhookJob</text>
+
+  <!-- Tenant App -> Queue -->
+  <line x1="540" y1="280" x2="520" y2="460" stroke="#22c55e" stroke-width="2" marker-end="url(#arrow-green)"/>
+  <text x="528" y="436" font-family="system-ui, sans-serif" font-size="10" fill="#86efac">dispatch: Generate</text>
+  <text x="528" y="449" font-family="system-ui, sans-serif" font-size="10" fill="#86efac">InvoicePdfJob, SendInvoiceEmailJob</text>
+
+  <!-- Queue -> Jobs fan-out -->
+  <line x1="175" y1="530" x2="175" y2="568" stroke="#22c55e" stroke-width="2" marker-end="url(#arrow-green)"/>
+  <line x1="500" y1="530" x2="500" y2="568" stroke="#22c55e" stroke-width="2" marker-end="url(#arrow-green)"/>
+  <line x1="825" y1="530" x2="825" y2="568" stroke="#22c55e" stroke-width="2" marker-end="url(#arrow-green)"/>
+  <text x="500" y="551" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#86efac">dequeue</text>
+
+  <!-- Jobs -> sinks -->
+  <line x1="175" y1="638" x2="175" y2="676" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow-slate)"/>
+  <line x1="500" y1="638" x2="500" y2="676" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow-slate)"/>
+
+  <!-- legend -->
+  <g transform="translate(30, 800)">
+    <line x1="0" y1="0" x2="26" y2="0" stroke="#3b82f6" stroke-width="2"/>
+    <text x="32" y="4" font-family="system-ui, sans-serif" font-size="11" fill="#cbd5e1">HTTP request</text>
+
+    <line x1="150" y1="0" x2="176" y2="0" stroke="#3b82f6" stroke-width="2" stroke-dasharray="6 4"/>
+    <text x="182" y="4" font-family="system-ui, sans-serif" font-size="11" fill="#cbd5e1">scheduled trigger</text>
+
+    <line x1="320" y1="0" x2="346" y2="0" stroke="#f97316" stroke-width="2"/>
+    <text x="352" y="4" font-family="system-ui, sans-serif" font-size="11" fill="#cbd5e1">billing / webhook</text>
+
+    <line x1="510" y1="0" x2="536" y2="0" stroke="#22c55e" stroke-width="2"/>
+    <text x="542" y="4" font-family="system-ui, sans-serif" font-size="11" fill="#cbd5e1">async invoice jobs</text>
+
+    <line x1="700" y1="0" x2="726" y2="0" stroke="#94a3b8" stroke-width="2"/>
+    <text x="732" y="4" font-family="system-ui, sans-serif" font-size="11" fill="#cbd5e1">DB write</text>
+
+    <line x1="820" y1="0" x2="846" y2="0" stroke="#94a3b8" stroke-width="2" stroke-dasharray="6 4"/>
+    <text x="852" y="4" font-family="system-ui, sans-serif" font-size="11" fill="#cbd5e1">cross-context read</text>
+  </g>
+</svg>

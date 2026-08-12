@@ -4,7 +4,20 @@ A multi-tenant B2B invoicing and subscription SaaS built on Laravel 11, showcasi
 database-per-tenant multi-tenancy, Stripe-based recurring billing, async queue
 processing (Horizon), and per-plan feature gating.
 
+<p align="center">
+  <img src="docs/screenshots/admin-dashboard.png" alt="Central admin revenue dashboard showing MRR, ARR, active subscribers, and churn rate" width="900">
+</p>
+
+<p align="center">
+  <em>Each tenant gets its own invoice-status dashboard on its own subdomain:</em><br>
+  <img src="docs/screenshots/tenant-dashboard.png" alt="Tenant dashboard showing an invoice status breakdown bar and table (sent, paid, draft, past due)" width="900">
+</p>
+
 ## Architecture
+
+<p align="center">
+  <img src="docs/architecture-diagram.svg" alt="Architecture diagram of request routing, per-tenant databases, billing/webhook flow, and the async job queue" width="900">
+</p>
 
 - **Multi-tenancy:** database-per-tenant via [`stancl/tenancy`](https://tenancyforlaravel.com).
   Each tenant is identified by subdomain (`acme.saas.test`) and gets its own physical
